@@ -9,108 +9,110 @@
 <style>
   :root{
     --ink:#1B2430; --ink-2:#2C3646; --paper:#F7F5F1; --paper-2:#EFEBE3;
-    --accent:#C9A227; --ok:#3D6B5C; --warn:#B44B3C; --line: rgba(27,36,48,0.12); --text-soft:#5B6472;
+    --accent:#C9A227; --ok:#3D6B5C; --warn:#B44B3C; --it:#3D5A80;
+    --line: rgba(27,36,48,0.12); --text-soft:#5B6472;
   }
   *{box-sizing:border-box;}
   html,body{margin:0;padding:0;background:var(--paper);color:var(--ink);font-family:'Inter',sans-serif;}
   .wrap{max-width:1120px;margin:0 auto;padding:0 20px 80px;}
+
   .masthead{background:var(--ink);color:var(--paper);padding:34px 20px 26px;margin-bottom:28px;}
   .masthead-inner{max-width:1120px;margin:0 auto;}
   .eyebrow{font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.14em;color:var(--accent);display:flex;align-items:center;gap:10px;margin-bottom:10px;}
-  .dot{width:8px;height:8px;border-radius:50%;background:var(--warn);transition:0.3s;}
+  
+  /* LAMPU INDIKATOR */
+  .dot{width:8px;height:8px;border-radius:50%;background:var(--warn); transition: 0.3s;}
+  
   .masthead h1{font-family:'Fraunces',serif;font-weight:600;font-size:34px;margin:0 0 6px;}
   .masthead h1 input{background:transparent;border:none;color:inherit;font:inherit;width:100%;outline:none;}
   .masthead-sub{color:rgba(247,245,241,0.6);font-size:14px;display:flex;gap:18px;font-family:'IBM Plex Mono',monospace;}
+
   .mode-switch{display:inline-flex;background:rgba(247,245,241,0.08);border:1px solid rgba(247,245,241,0.18);border-radius:100px;padding:3px;margin-top:18px;}
   .mode-switch button{border:none;background:transparent;color:rgba(247,245,241,0.65);font-family:'IBM Plex Mono',monospace;font-size:12px;padding:7px 16px;border-radius:100px;cursor:pointer;}
   .mode-switch button.active{background:var(--accent);color:var(--ink);font-weight:500;}
+
   .section{margin-bottom:36px;}
   .section-head{display:flex;justify-content:space-between;border-bottom:1px solid var(--line);padding-bottom:10px;margin-bottom:18px;}
   .section-head h2{font-family:'Fraunces',serif;font-size:20px;margin:0;}
+  .section-tag{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--text-soft);}
+
   .stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:20px;}
   .stat-card{background:#fff;border:1px solid var(--line);border-radius:4px;padding:16px;}
   .stat-num{font-family:'Fraunces',serif;font-size:30px;font-weight:600;}
   .stat-label{font-family:'IBM Plex Mono',monospace;font-size:10.5px;color:var(--text-soft);margin-top:6px;}
   .stat-card.ok .stat-num{color:var(--ok);} .stat-card.warn .stat-num{color:var(--warn);} .stat-card.accent .stat-num{color:var(--accent);}
-  .note-box{background:#fff;border:1px solid var(--line);border-radius:4px;padding:16px;}
+
+  .note-box{background:#fff;border:1px solid var(--line);border-radius:4px;padding:16px;margin-bottom:20px;}
   .note-box textarea{width:100%;border:none;outline:none;font-family:'Inter',sans-serif;font-size:14px;min-height:60px;background:transparent;}
+
   .brand-row, .member-row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px;}
-  .brand-chip, .member-chip{display:flex;align-items:center;gap:6px;background:#fff;border:1px solid var(--line);border-radius:100px;padding:5px 14px;}
-  .brand-chip button, .member-chip button{border:none;background:none;color:var(--warn);cursor:pointer;font-weight:bold;}
+  .brand-chip, .member-chip{display:flex;align-items:center;gap:6px;background:#fff;border:1px solid var(--line);border-radius:100px;padding:5px 12px;font-size:12.5px;}
+  .brand-chip button, .member-chip button{border:none;background:none;color:var(--warn);cursor:pointer;}
+  
   .add-brand, .add-member{display:flex;gap:8px;margin-bottom:12px;}
-  .add-brand input, .add-member input{padding:7px;border:1px solid var(--line);border-radius:4px;}
-  .btn{font-family:'IBM Plex Mono',monospace;font-size:12px;background:var(--ink);color:var(--paper);border:none;border-radius:100px;padding:8px 16px;cursor:pointer;}
-  
-  .emergency-box{background:#fff;border:2px dashed var(--warn);padding:16px;margin-bottom:20px;border-radius:4px;text-align:center;}
-  .btn-danger{background:var(--ok);color:#fff;font-weight:bold;border:none;padding:10px 20px;border-radius:100px;cursor:pointer;font-family:'IBM Plex Mono',monospace;margin-top:10px;}
-  
-  .share-hint{font-family:'IBM Plex Mono',monospace;font-size:11px;background:#fff;border:1px dashed var(--ok);padding:12px;margin-bottom:20px;border-radius:4px;}
+  .add-brand input, .add-brand select, .add-member input{padding:7px;border:1px solid var(--line);border-radius:4px;}
+  .btn{font-family:'IBM Plex Mono',monospace;font-size:12px;background:var(--ink);color:var(--paper);border:none;border-radius:3px;padding:8px 16px;cursor:pointer;}
+
   .board{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;}
-  .col{background:#fff;border:1px solid var(--line);border-radius:4px;padding:12px;min-height:150px;}
-  .task-card{border:1px solid var(--line);border-left:3px solid var(--text-soft);padding:10px;margin-bottom:8px;background:var(--paper);border-radius:3px;}
+  .col{background:#fff;border:1px solid var(--line);border-radius:4px;padding:12px;}
+  .col-head{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--text-soft);margin-bottom:12px;}
+  .task-card{border:1px solid var(--line);border-left:3px solid var(--text-soft);padding:10px;margin-bottom:8px;background:var(--paper);}
+  .task-card.progress{border-left-color:var(--accent);} .task-card.done{border-left-color:var(--ok);opacity:.8;}
+  .txt{font-size:13.5px;margin:4px 0;} .txt.done{text-decoration:line-through;color:var(--text-soft);}
+  .meta{display:flex;justify-content:space-between;font-size:11px;} .actions button{cursor:pointer;background:none;border:none;}
+
   .add-form{display:grid;grid-template-columns:1fr 1fr 2fr auto;gap:8px;margin-bottom:16px;background:#fff;padding:12px;border:1px solid var(--line);}
-  .add-form select, .add-form input{padding:8px;border:1px solid var(--line);}
-  @media(max-width:760px){.stats-row, .board, .add-form{grid-template-columns:1fr;}}
+  .add-form input, .add-form select{padding:8px;border:1px solid var(--line);}
+
+  .share-hint{font-family:'IBM Plex Mono',monospace;font-size:11px;background:#fff;border:1px dashed var(--ok);padding:12px;margin-bottom:20px;}
 </style>
 </head>
 <body>
 
 <div class="masthead">
   <div class="masthead-inner">
-    <div class="eyebrow"><span class="dot" id="syncDot"></span> REPORT DASHBOARD &mdash; REAL-TIME LIVE</div>
-    <h1><input id="teamName" value="Babagi/Digital Marketing" /></h1>
+    <div class="eyebrow"><span class="dot" id="syncDot" title="Sync Status"></span> REPORT DASHBOARD &mdash; REAL-TIME</div>
+    <h1><input id="teamName" value="Loading Data..." /></h1>
     <div class="masthead-sub"><span id="dateLabel"></span></div>
     <div class="mode-switch"><button id="modeTeamBtn" class="active">EDIT MODE</button><button id="modeExecBtn">VIEW MODE</button></div>
   </div>
 </div>
 
-<div class="wrap">
-  <div class="emergency-box" id="emergencyBox" style="display:none;">
-    <p style="margin:0; color:var(--ok); font-weight:bold;">✨ KODE BARU SIAP DIAKTIFKAN</p>
-    <p style="margin:5px 0 0; font-size:13px; color:var(--text-soft);">Klik tombol hijau di bawah ini untuk membuat link pelaporan real-time yang baru via server cadangan.</p>
-    <button class="btn-danger" id="forceBtn" onclick="forceCreateDatabase()">⚡ AKTIFKAN LINK REAL-TIME</button>
+<div class="wrap" id="app" style="display:none;">
+  <div class="share-hint">
+    ✅ <b>SISTEM REAL-TIME AKTIF:</b> Bagikan link di atas. Perubahan di laptopmu akan otomatis muncul di HP atasan dalam hitungan detik!
   </div>
 
-  <div class="share-hint" id="shareHintBox" style="display:none;">
-    ✅ <b>LINK DASHBOARD LIVE AKTIF:</b> Cukup kirim alamat link panjang ber-ID di atas browsermu <b>SEKALI SAJA</b> ke atasan!
+  <div class="section">
+    <div class="section-head"><h2>Summary</h2></div>
+    <div class="stats-row">
+      <div class="stat-card"><div class="stat-num" id="sTot">0</div><div class="stat-label">Total</div></div>
+      <div class="stat-card ok"><div class="stat-num" id="sDone">0</div><div class="stat-label">Done</div></div>
+      <div class="stat-card accent"><div class="stat-num" id="sProg">0</div><div class="stat-label">Progress</div></div>
+      <div class="stat-card warn"><div class="stat-num" id="sTodo">0</div><div class="stat-label">Todo</div></div>
+    </div>
+    <div class="note-box"><textarea id="weekNote" placeholder="Catatan mingguan..."></textarea></div>
   </div>
 
-  <div id="mainApp">
-    <!-- SUMMARY -->
-    <div class="section">
-      <div class="section-head"><h2>This Week's Summary</h2></div>
-      <div class="stats-row">
-        <div class="stat-card"><div class="stat-num" id="sTot">0</div><div class="stat-label">Total Tasks</div></div>
-        <div class="stat-card ok"><div class="stat-num" id="sDone">0</div><div class="stat-label">Done</div></div>
-        <div class="stat-card accent"><div class="stat-num" id="sProg">0</div><div class="stat-label">In Progress</div></div>
-        <div class="stat-card warn"><div class="stat-num" id="sTodo">0</div><div class="stat-label">Not Started</div></div>
-      </div>
-      <div class="note-box"><textarea id="weekNote" placeholder="Tulis ringkasan progres di sini..."></textarea></div>
-    </div>
+  <div class="section">
+    <div class="section-head"><h2>Brands & Members</h2></div>
+    <div class="brand-row" id="brandRow"></div>
+    <div class="add-brand"><input id="bName" placeholder="Brand Name"/><button class="btn" onclick="addBrand()">Add Brand</button></div>
+    <div class="member-row" id="memberRow"></div>
+    <div class="add-member"><input id="mName" placeholder="Member Name"/><button class="btn" onclick="addMember()">Add Member</button></div>
+  </div>
 
-    <!-- SETUP -->
-    <div class="section" id="setupSection">
-      <div class="section-head"><h2>Setup Brands & Members</h2></div>
-      <div class="brand-row" id="brandRow"></div>
-      <div class="add-brand"><input id="bName" placeholder="Brand Name"/><button class="btn" onclick="addBrand()">+ Add Brand</button></div>
-      <div style="height:10px;"></div>
-      <div class="member-row" id="memberRow"></div>
-      <div class="add-member"><input id="mName" placeholder="Member Name"/><button class="btn" onclick="addMember()">+ Add Member</button></div>
+  <div class="section">
+    <div class="section-head"><h2>Tasks Board</h2></div>
+    <div class="add-form">
+      <select id="tBrand"></select><select id="tMember"></select>
+      <input id="tText" placeholder="Task..."/>
+      <button class="btn" onclick="addTask()">Add Task</button>
     </div>
-
-    <!-- TASKS -->
-    <div class="section">
-      <div class="section-head"><h2>Tasks Board</h2></div>
-      <div class="add-form" id="addTaskForm">
-        <select id="tBrand"></select><select id="tMember"></select>
-        <input id="tText" placeholder="Uraian tugas kerjaan..."/>
-        <button class="btn" onclick="addTask()">+ Add Task</button>
-      </div>
-      <div class="board">
-        <div class="col"><b>NOT STARTED</b><div id="cTodo"></div></div>
-        <div class="col"><b>IN PROGRESS</b><div id="cProg"></div></div>
-        <div class="col"><b>DONE</b><div id="cDone"></div></div>
-      </div>
+    <div class="board">
+      <div class="col"><div class="col-head">NOT STARTED</div><div id="cTodo"></div></div>
+      <div class="col"><div class="col-head">IN PROGRESS</div><div id="cProg"></div></div>
+      <div class="col"><div class="col-head">DONE</div><div id="cDone"></div></div>
     </div>
   </div>
 </div>
@@ -120,118 +122,108 @@ let data = { teamName:'Babagi/Digital Marketing', note:'', brands:[], members:[]
 let mode = 'team';
 let saveTimer;
 
+function uid(){ return Math.random().toString(36).substr(2,9); }
+
 async function init() {
   document.getElementById('dateLabel').textContent = new Date().toLocaleDateString('en-US',{dateStyle:'full'});
-  try{ let local = localStorage.getItem('babagi-cloud-live'); if(local) data = Object.assign(data, JSON.parse(local)); }catch(e){}
+  
+  // Coba selamatkan data lama dari memori lokal
+  try{ let local = localStorage.getItem('babagi-realtime'); if(local) data = Object.assign(data, JSON.parse(local)); }catch(e){}
 
   let hash = window.location.hash.substring(1);
 
+  // Jika URL tidak punya ID, atau masih nyangkut ID #rep_ lama, BUAT DATABASE BARU!
   if(!hash || hash.startsWith('rep_') || hash.startsWith('data=')) {
-    document.getElementById('emergencyBox').style.display = 'block';
-  } else {
-    document.getElementById('shareHintBox').style.display = 'block';
-    await loadFromCloud(hash);
-    setInterval(() => loadFromCloud(hash), 4000);
+    try {
+      let res = await fetch('https://api.npoint.io', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(data) });
+      let json = await res.json();
+      hash = json.id; 
+      window.location.hash = hash; // Munculkan ID Pendek!
+    } catch(e) {}
   }
+
+  // Jika sudah punya ID, mulai siklus tarik data Real-Time
+  if(hash) {
+    await fetchCloud(hash);
+    setInterval(() => fetchCloud(hash), 4000); // Tarik data baru tiap 4 detik!
+  }
+  
+  document.getElementById('app').style.display='block';
   render();
 }
 
-async function forceCreateDatabase() {
-  const btn = document.getElementById('forceBtn');
-  btn.innerText = "Sedang Menghubungkan ke Server Baru...";
+async function fetchCloud(id) {
   try {
-    let res = await fetch('https://api.restful-api.dev/objects', {
-      method:'POST',
-      headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({ name: "Babagi_Dashboard", data: data })
-    });
+    let res = await fetch('https://api.npoint.io/' + id);
     if(res.ok) {
-      let json = await res.json();
-      window.location.hash = json.id;
-      alert("Link Unik Sukses Terbuat! Halaman akan memuat ulang.");
-      window.location.reload();
-    } else {
-      alert("Server cadangan sibuk, coba klik sekali lagi.");
-      btn.innerText = "⚡ AKTIFKAN LINK REAL-TIME";
-    }
-  } catch(e) {
-    alert("Koneksi gagal. Silakan coba klik tombolnya sekali lagi.");
-    btn.innerText = "⚡ AKTIFKAN LINK REAL-TIME";
-  }
-}
-
-async function loadFromCloud(id) {
-  try {
-    let res = await fetch('https://api.restful-api.dev/objects/' + id);
-    if(res.ok) {
-      let json = await res.json();
-      if(json.data) data = Object.assign(data, json.data);
-      document.getElementById('syncDot').style.background = 'var(--ok)';
+      let cloud = await res.json();
+      data = Object.assign(data, cloud);
+      document.getElementById('syncDot').style.background = 'var(--ok)'; // Hijau = Konek!
       render();
     }
-  } catch(e) { document.getElementById('syncDot').style.background = 'var(--warn)'; }
+  } catch(e) { document.getElementById('syncDot').style.background = 'var(--warn)'; } // Merah = Putus
 }
 
 function saveData() {
-  localStorage.setItem('babagi-cloud-live', JSON.stringify(data));
+  localStorage.setItem('babagi-realtime', JSON.stringify(data));
   let id = window.location.hash.substring(1);
-  if(!id || id.startsWith('rep_') || id.startsWith('data=')) return;
+  if(!id) return;
 
-  document.getElementById('syncDot').style.background = 'var(--accent)';
+  document.getElementById('syncDot').style.background = 'var(--accent)'; // Kuning = Uploading
   clearTimeout(saveTimer);
   saveTimer = setTimeout(async () => {
     try {
-      await fetch('https://api.restful-api.dev/objects/' + id, {
-        method:'PUT',
-        headers:{'Content-Type':'application/json'},
-        body:JSON.stringify({ name: "Babagi_Dashboard", data: data })
-      });
+      await fetch('https://api.npoint.io/' + id, { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(data) });
       document.getElementById('syncDot').style.background = 'var(--ok)';
     } catch(e) { document.getElementById('syncDot').style.background = 'var(--warn)'; }
-  }, 800);
+  }, 1000);
 }
 
 function render() {
-  document.getElementById('teamName').value = data.teamName || 'Babagi/Digital Marketing';
-  document.getElementById('weekNote').value = data.note || '';
+  document.getElementById('teamName').value = data.teamName;
+  document.getElementById('weekNote').value = data.note;
+  
   document.getElementById('sTot').innerText = data.tasks.length;
   document.getElementById('sDone').innerText = data.tasks.filter(t=>t.status==='done').length;
   document.getElementById('sProg').innerText = data.tasks.filter(t=>t.status==='prog').length;
   document.getElementById('sTodo').innerText = data.tasks.filter(t=>t.status==='todo').length;
-  document.getElementById('brandRow').innerHTML = data.brands.map(b=>`<div class="brand-chip">${b.name} ${mode==='team'?`<button onclick="delBrand('${b.id}')">&times;</button>`:''}</div>`).join('');
-  document.getElementById('memberRow').innerHTML = data.members.map(m=>`<div class="member-chip">${m} ${mode==='team'?`<button onclick="delMember('${m}')">&times;</button>`:''}</div>`).join('');
+
+  document.getElementById('brandRow').innerHTML = data.brands.map(b=>`<div class="brand-chip">${b.name} <button onclick="delBrand('${b.id}')">x</button></div>`).join('');
+  document.getElementById('memberRow').innerHTML = data.members.map(m=>`<div class="member-chip">${m} <button onclick="delMember('${m}')">x</button></div>`).join('');
+  
   document.getElementById('tBrand').innerHTML = data.brands.map(b=>`<option value="${b.id}">${b.name}</option>`).join('');
   document.getElementById('tMember').innerHTML = data.members.map(m=>`<option value="${m}">${m}</option>`).join('');
 
   ['todo','prog','done'].forEach(status => {
-    let container = document.getElementById('c' + status.charAt(0).toUpperCase() + status.slice(1));
-    container.innerHTML = data.tasks.filter(t=>t.status===status).map(t=>{
+    document.getElementById('c'+status.charAt(0).toUpperCase()+status.slice(1)).innerHTML = data.tasks.filter(t=>t.status===status).map(t=>{
       let b = data.brands.find(x=>x.id===t.brand);
-      return `<div class="task-card">
-        <div><b>${t.member}</b> <span style="font-size:11px;color:var(--text-soft)">${b?b.name:''}</span></div>
-        <div style="margin:5px 0;">${t.txt}</div>
-        ${mode==='team' ? `<div>
+      return `<div class="task-card ${status}">
+        <div class="meta"><b>${t.member}</b> <span>${b?b.name:''}</span></div>
+        <div class="txt ${status==='done'?'done':''}">${t.txt}</div>
+        <div class="actions">
           ${status!=='todo' ? `<button onclick="moveTask('${t.id}','${status==='done'?'prog':'todo'}')">←</button>` : ''}
           ${status!=='done' ? `<button onclick="moveTask('${t.id}','${status==='todo'?'prog':'done'}')">→</button>` : ''}
-          <button onclick="delTask('${t.id}')" style="color:var(--warn)">x</button>
-        </div>` : ''}
+          <button onclick="delTask('${t.id}')">❌</button>
+        </div>
       </div>`;
     }).join('');
   });
 }
 
-function addBrand(){ let v=document.getElementById('bName').value.trim(); if(v){ data.brands.push({id:uid(), name:v}); document.getElementById('bName').value=''; saveData(); render();} }
+function addBrand(){ let v=document.getElementById('bName').value; if(v){ data.brands.push({id:uid(), name:v}); document.getElementById('bName').value=''; saveData(); render();} }
 function delBrand(id){ data.brands=data.brands.filter(x=>x.id!==id); saveData(); render(); }
-function addMember(){ let v=document.getElementById('mName').value.trim(); if(v){ data.members.push(v); document.getElementById('mName').value=''; saveData(); render();} }
+function addMember(){ let v=document.getElementById('mName').value; if(v){ data.members.push(v); document.getElementById('mName').value=''; saveData(); render();} }
 function delMember(m){ data.members=data.members.filter(x=>x!==m); saveData(); render(); }
 function addTask(){ 
-  let b=document.getElementById('tBrand').value, m=document.getElementById('tMember').value, txt=document.getElementById('tText').value.trim();
+  let b=document.getElementById('tBrand').value, m=document.getElementById('tMember').value, txt=document.getElementById('tText').value;
   if(b&&m&&txt){ data.tasks.push({id:uid(), brand:b, member:m, txt, status:'todo'}); document.getElementById('tText').value=''; saveData(); render(); }
 }
-function moveTask(id, st){ let t=data.tasks.find(x=>x.id===id); if(t){t.status=st; saveData(); render();} }
+function moveTask(id, st){ data.tasks.find(x=>x.id===id).status=st; saveData(); render(); }
 function delTask(id){ data.tasks=data.tasks.filter(x=>x.id!==id); saveData(); render(); }
+
 document.getElementById('teamName').oninput = e => { data.teamName = e.target.value; saveData(); };
 document.getElementById('weekNote').oninput = e => { data.note = e.target.value; saveData(); };
+
 init();
 </script>
 </body>
