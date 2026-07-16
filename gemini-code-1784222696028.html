@@ -1,0 +1,777 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Report Dashboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#1B2430;
+    --ink-2:#2C3646;
+    --paper:#F7F5F1;
+    --paper-2:#EFEBE3;
+    --accent:#C9A227;
+    --ok:#3D6B5C;
+    --warn:#B44B3C;
+    --it:#3D5A80;
+    --line: rgba(27,36,48,0.12);
+    --text-soft:#5B6472;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--paper);
+    color:var(--ink);
+    font-family:'Inter',sans-serif;
+    -webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:1120px;margin:0 auto;padding:0 20px 80px;}
+
+  /* MASTHEAD */
+  .masthead{
+    background:var(--ink);
+    color:var(--paper);
+    padding:34px 20px 26px;
+    margin-bottom:28px;
+  }
+  .masthead-inner{max-width:1120px;margin:0 auto;}
+  .eyebrow{
+    font-family:'IBM Plex Mono',monospace;
+    font-size:11px;
+    letter-spacing:.14em;
+    text-transform:uppercase;
+    color:var(--accent);
+    display:flex;
+    align-items:center;
+    gap:10px;
+    margin-bottom:10px;
+  }
+  .eyebrow .dot{width:6px;height:6px;border-radius:50%;background:var(--accent);}
+  .masthead h1{
+    font-family:'Fraunces',serif;
+    font-weight:600;
+    font-size:34px;
+    margin:0 0 6px;
+    letter-spacing:-.01em;
+  }
+  .masthead h1 input{
+    background:transparent;border:none;color:inherit;font:inherit;
+    width:100%;outline:none;border-bottom:1px dashed transparent;
+  }
+  .masthead h1 input:focus{border-bottom:1px dashed var(--accent);}
+  .masthead-sub{
+    color:rgba(247,245,241,0.6);
+    font-size:14px;
+    display:flex;gap:18px;flex-wrap:wrap;
+    font-family:'IBM Plex Mono',monospace;
+  }
+
+  .mode-switch{
+    display:inline-flex;
+    background:rgba(247,245,241,0.08);
+    border:1px solid rgba(247,245,241,0.18);
+    border-radius:100px;
+    padding:3px;
+    margin-top:18px;
+  }
+  .mode-switch button{
+    border:none;background:transparent;color:rgba(247,245,241,0.65);
+    font-family:'IBM Plex Mono',monospace;font-size:12px;letter-spacing:.04em;
+    padding:7px 16px;border-radius:100px;cursor:pointer;transition:.15s;
+  }
+  .mode-switch button.active{background:var(--accent);color:var(--ink);font-weight:500;}
+
+  /* SECTION HEADERS */
+  .section{margin-bottom:36px;}
+  .section-head{
+    display:flex;align-items:baseline;justify-content:space-between;flex-wrap:wrap;gap:8px;
+    border-bottom:1px solid var(--line);
+    padding-bottom:10px;margin-bottom:18px;
+  }
+  .section-head h2{
+    font-family:'Fraunces',serif;font-size:20px;font-weight:600;margin:0;
+  }
+  .section-tag{
+    font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--text-soft);
+    letter-spacing:.06em;
+  }
+
+  /* STATS ROW */
+  .stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:20px;}
+  .stat-card{
+    background:#fff;border:1px solid var(--line);border-radius:4px;
+    padding:16px 16px 14px;
+  }
+  .stat-num{font-family:'Fraunces',serif;font-size:30px;font-weight:600;line-height:1;}
+  .stat-label{font-family:'IBM Plex Mono',monospace;font-size:10.5px;text-transform:uppercase;letter-spacing:.08em;color:var(--text-soft);margin-top:6px;}
+  .stat-card.ok .stat-num{color:var(--ok);}
+  .stat-card.warn .stat-num{color:var(--warn);}
+  .stat-card.accent .stat-num{color:var(--accent);}
+
+  .progress-bar-wrap{
+    background:#fff;border:1px solid var(--line);border-radius:4px;padding:14px 16px;margin-bottom:20px;
+  }
+  .progress-bar-label{display:flex;justify-content:space-between;font-size:12px;color:var(--text-soft);margin-bottom:8px;font-family:'IBM Plex Mono',monospace;}
+  .progress-track{height:8px;background:var(--paper-2);border-radius:100px;overflow:hidden;}
+  .progress-fill{height:100%;background:var(--ok);border-radius:100px;transition:width .3s;}
+
+  .note-box{
+    background:#fff;border:1px solid var(--line);border-radius:4px;padding:16px;margin-bottom:20px;
+  }
+  .note-box label{font-family:'IBM Plex Mono',monospace;font-size:10.5px;text-transform:uppercase;letter-spacing:.08em;color:var(--text-soft);display:block;margin-bottom:8px;}
+  .note-box textarea{
+    width:100%;border:none;outline:none;font-family:'Inter',sans-serif;font-size:14px;
+    line-height:1.5;resize:vertical;min-height:60px;color:var(--ink);background:transparent;
+  }
+
+  /* BY BRAND SUMMARY */
+  .brand-summary{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;}
+  .brand-sum-card{
+    background:#fff;border:1px solid var(--line);border-radius:4px;padding:12px 14px;
+  }
+  .brand-sum-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;}
+  .brand-sum-name{font-size:13px;font-weight:600;}
+  .type-tag{font-family:'IBM Plex Mono',monospace;font-size:9px;text-transform:uppercase;letter-spacing:.05em;padding:2px 6px;border-radius:100px;}
+  .type-tag.marketing{background:rgba(201,162,39,0.15);color:#8a6c1a;}
+  .type-tag.it{background:rgba(61,90,128,0.14);color:var(--it);}
+  .brand-sum-track{height:6px;background:var(--paper-2);border-radius:100px;overflow:hidden;margin-bottom:6px;}
+  .brand-sum-fill{height:100%;background:var(--ok);border-radius:100px;}
+  .brand-sum-text{font-family:'IBM Plex Mono',monospace;font-size:10.5px;color:var(--text-soft);}
+
+  /* BRANDS MANAGE */
+  .brand-row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px;}
+  .brand-chip{
+    display:flex;align-items:center;gap:6px;background:#fff;border:1px solid var(--line);
+    border-radius:100px;padding:5px 6px 5px 12px;font-size:12.5px;
+  }
+  .brand-chip button{border:none;background:none;color:var(--text-soft);cursor:pointer;font-size:13px;padding:2px 4px;}
+  .brand-chip button:hover{color:var(--warn);}
+  .add-brand{display:flex;gap:8px;flex-wrap:wrap;}
+  .add-brand input, .add-brand select{font-family:'Inter',sans-serif;font-size:13px;padding:7px 10px;border:1px solid var(--line);border-radius:100px;outline:none;}
+  .add-brand input{width:200px;}
+  .add-brand input:focus, .add-brand select:focus{border-color:var(--accent);}
+
+  /* MEMBER MANAGE */
+  .member-row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px;}
+  .member-chip{
+    display:flex;align-items:center;gap:6px;background:#fff;border:1px solid var(--line);
+    border-radius:100px;padding:5px 6px 5px 12px;font-size:12.5px;
+  }
+  .member-chip button{border:none;background:none;color:var(--text-soft);cursor:pointer;font-size:13px;padding:2px 4px;}
+  .member-chip button:hover{color:var(--warn);}
+  .add-member{display:flex;gap:8px;}
+  .add-member input{font-family:'Inter',sans-serif;font-size:13px;padding:7px 10px;border:1px solid var(--line);border-radius:100px;outline:none;width:160px;}
+  .add-member input:focus{border-color:var(--accent);}
+
+  /* FILTER */
+  .filter-row{display:flex;align-items:center;gap:8px;margin-bottom:14px;}
+  .filter-row label{font-family:'IBM Plex Mono',monospace;font-size:10.5px;text-transform:uppercase;letter-spacing:.06em;color:var(--text-soft);}
+  .filter-row select{font-family:'Inter',sans-serif;font-size:13px;padding:6px 10px;border:1px solid var(--line);border-radius:3px;background:#fff;outline:none;}
+
+  /* TODO BOARD */
+  .board{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;}
+  .col{background:#fff;border:1px solid var(--line);border-radius:4px;padding:12px;min-height:120px;}
+  .col-head{display:flex;align-items:center;gap:8px;margin-bottom:12px;font-family:'IBM Plex Mono',monospace;font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--text-soft);}
+  .col-head .swatch{width:8px;height:8px;border-radius:50%;}
+  .swatch.todo{background:var(--text-soft);}
+  .swatch.progress{background:var(--accent);}
+  .swatch.done{background:var(--ok);}
+  .task-card{
+    border:1px solid var(--line);border-left:3px solid var(--text-soft);border-radius:3px;
+    padding:10px 10px 8px;margin-bottom:8px;background:var(--paper);position:relative;
+  }
+  .task-card.progress{border-left-color:var(--accent);}
+  .task-card.done{border-left-color:var(--ok);opacity:.8;}
+  .task-card .top-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:2px;}
+  .task-card .who{font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--text-soft);text-transform:uppercase;letter-spacing:.05em;}
+  .task-card .brand-label{font-family:'IBM Plex Mono',monospace;font-size:9.5px;color:var(--ink);background:var(--paper-2);padding:1px 6px;border-radius:100px;}
+  .task-card .txt{font-size:13.5px;margin:4px 0 6px;line-height:1.4;}
+  .task-card .txt.done{text-decoration:line-through;color:var(--text-soft);}
+  .task-card .meta{display:flex;justify-content:space-between;align-items:center;}
+  .task-card .deadline{font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--text-soft);}
+  .task-card .actions{display:flex;gap:6px;}
+  .icon-btn{
+    border:none;background:none;cursor:pointer;color:var(--text-soft);font-size:13px;padding:2px 4px;line-height:1;
+  }
+  .icon-btn:hover{color:var(--ink);}
+  .icon-btn.del:hover{color:var(--warn);}
+  .empty-hint{font-size:12px;color:var(--text-soft);font-style:italic;padding:6px 2px;}
+
+  /* ADD TASK FORM */
+  .add-form{
+    display:grid;grid-template-columns:1fr 1fr 1.6fr 1fr auto;gap:8px;margin-bottom:16px;
+    background:#fff;border:1px solid var(--line);border-radius:4px;padding:12px;
+  }
+  .add-form input, .add-form select{
+    font-family:'Inter',sans-serif;font-size:13px;padding:8px 10px;border:1px solid var(--line);
+    border-radius:3px;background:var(--paper);color:var(--ink);outline:none;
+  }
+  .add-form input:focus, .add-form select:focus{border-color:var(--accent);}
+  .btn{
+    font-family:'IBM Plex Mono',monospace;font-size:12px;background:var(--ink);color:var(--paper);
+    border:none;border-radius:3px;padding:8px 16px;cursor:pointer;letter-spacing:.03em;
+  }
+  .btn:hover{background:var(--ink-2);}
+  .btn.small{padding:6px 12px;font-size:11px;}
+
+  /* PAST PROJECTS */
+  .proj-table{width:100%;border-collapse:collapse;background:#fff;border:1px solid var(--line);border-radius:4px;overflow:hidden;}
+  .proj-table th{
+    text-align:left;font-family:'IBM Plex Mono',monospace;font-size:10.5px;text-transform:uppercase;
+    letter-spacing:.06em;color:var(--text-soft);padding:10px 12px;border-bottom:1px solid var(--line);background:var(--paper-2);
+  }
+  .proj-table td{padding:12px;border-bottom:1px solid var(--line);font-size:13.5px;vertical-align:top;}
+  .proj-table tr:last-child td{border-bottom:none;}
+  .badge{
+    font-family:'IBM Plex Mono',monospace;font-size:10px;text-transform:uppercase;letter-spacing:.04em;
+    padding:3px 8px;border-radius:100px;display:inline-block;
+  }
+  .badge.done{background:rgba(61,107,92,0.12);color:var(--ok);}
+  .badge.cancelled{background:rgba(180,75,60,0.12);color:var(--warn);}
+  .badge.hold{background:rgba(201,162,39,0.15);color:#8a6c1a;}
+  .proj-add{
+    display:grid;grid-template-columns:1.3fr 1fr 1fr 1fr 1.5fr auto;gap:8px;margin-bottom:12px;
+    background:#fff;border:1px solid var(--line);border-radius:4px;padding:12px;
+  }
+  .proj-add input, .proj-add select{
+    font-family:'Inter',sans-serif;font-size:13px;padding:8px 10px;border:1px solid var(--line);
+    border-radius:3px;background:var(--paper);outline:none;
+  }
+  .proj-add input:focus, .proj-add select:focus{border-color:var(--accent);}
+
+  .share-hint{
+    font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--text-soft);
+    background:#fff;border:1px dashed var(--line);border-radius:4px;padding:12px 14px;margin-bottom:28px;
+  }
+  .share-hint b{color:var(--ink);}
+
+  .loading{padding:60px 20px;text-align:center;color:var(--text-soft);font-family:'IBM Plex Mono',monospace;font-size:13px;}
+
+  @media(max-width:760px){
+    .stats-row{grid-template-columns:repeat(2,1fr);}
+    .brand-summary{grid-template-columns:1fr;}
+    .board{grid-template-columns:1fr;}
+    .add-form{grid-template-columns:1fr;}
+    .proj-add{grid-template-columns:1fr;}
+    .masthead h1{font-size:26px;}
+  }
+</style>
+</head>
+<body>
+
+<div id="main-app-layout">
+  <div class="masthead">
+    <div class="masthead-inner">
+      <div class="eyebrow"><span class="dot"></span> REPORT DASHBOARD &mdash; INTERNAL</div>
+      <h1><input id="teamName" value="Team / Division Name" /></h1>
+      <div class="masthead-sub">
+        <span id="weekLabel"></span>
+        <span id="dateLabel"></span>
+      </div>
+      <div class="mode-switch">
+        <button id="modeTeamBtn" class="active">TEAM MODE (EDIT)</button>
+        <button id="modeExecBtn">EXEC MODE (VIEW ONLY)</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="wrap">
+    <div id="loading" class="loading">Memuat dashboard cloud...</div>
+
+    <div id="app" style="display:none;">
+      <div class="share-hint" id="shareAlertBox">
+        <b>Cara Share agar Update Otomatis:</b> Salin seluruh alamat link di atas browsermu <i>(wajib beserta tanda pagar # di ujungnya)</i> lalu kirim ke atasan atau timmu!
+      </div>
+
+      <!-- SUMMARY -->
+      <div class="section">
+        <div class="section-head">
+          <h2>This Week's Summary</h2>
+          <span class="section-tag" id="taskCountTag"></span>
+        </div>
+        <div class="stats-row">
+          <div class="stat-card"><div class="stat-num" id="statTotal">0</div><div class="stat-label">Total Tasks</div></div>
+          <div class="stat-card ok"><div class="stat-num" id="statDone">0</div><div class="stat-label">Done</div></div>
+          <div class="stat-card accent"><div class="stat-num" id="statProgress">0</div><div class="stat-label">In Progress</div></div>
+          <div class="stat-card warn"><div class="stat-num" id="statTodo">0</div><div class="stat-label">Not Started</div></div>
+        </div>
+        <div class="progress-bar-wrap">
+          <div class="progress-bar-label"><span>Progress This Week</span><span id="progressPct">0%</span></div>
+          <div class="progress-track"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
+        </div>
+        <div class="note-box">
+          <label>Executive Summary Note</label>
+          <textarea id="weekNote" placeholder="e.g. Client A campaign on track, Client B delayed pending vendor approval..."></textarea>
+        </div>
+
+        <div class="section-head" style="border-bottom:none;margin-bottom:12px;padding-bottom:0;">
+          <span class="section-tag">PROGRESS BY BRAND</span>
+        </div>
+        <div class="brand-summary" id="brandSummary"></div>
+      </div>
+
+      <!-- BRANDS -->
+      <div class="section" id="brandSection">
+        <div class="section-head">
+          <h2>Brands / Clients</h2>
+          <span class="section-tag">MARKETING & IT SERVICES</span>
+        </div>
+        <div class="brand-row" id="brandRow"></div>
+        <div class="add-brand">
+          <input id="newBrandInput" placeholder="Brand / client name" />
+          <select id="newBrandType">
+            <option value="marketing">Digital Marketing</option>
+            <option value="it">IT Services</option>
+          </select>
+          <button class="btn small" id="addBrandBtn">+ Add Brand</button>
+        </div>
+      </div>
+
+      <!-- MEMBERS -->
+      <div class="section" id="memberSection">
+        <div class="section-head">
+          <h2>Team Members</h2>
+          <span class="section-tag">TEAM</span>
+        </div>
+        <div class="member-row" id="memberRow"></div>
+        <div class="add-member">
+          <input id="newMemberInput" placeholder="New member name" />
+          <button class="btn small" id="addMemberBtn">+ Add</button>
+        </div>
+      </div>
+
+      <!-- TO DO -->
+      <div class="section">
+        <div class="section-head">
+          <h2>To-Do List</h2>
+          <span class="section-tag">TASK STATUS</span>
+        </div>
+
+        <div class="add-form" id="addTaskForm">
+          <select id="taskBrand"></select>
+          <select id="taskMember"></select>
+          <input id="taskText" placeholder="Task description..." />
+          <input id="taskDeadline" type="date" />
+          <button class="btn" id="addTaskBtn">+ Add Task</button>
+        </div>
+
+        <div class="filter-row">
+          <label>Filter</label>
+          <select id="taskBrandFilter"><option value="all">All Brands</option></select>
+        </div>
+
+        <div class="board">
+          <div class="col">
+            <div class="col-head"><span class="swatch todo"></span> Not Started</div>
+            <div id="colTodo"></div>
+          </div>
+          <div class="col">
+            <div class="col-head"><span class="swatch progress"></span> In Progress</div>
+            <div id="colProgress"></div>
+          </div>
+          <div class="col">
+            <div class="col-head"><span class="swatch done"></span> Done</div>
+            <div id="colDone"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- PAST PROJECTS -->
+      <div class="section">
+        <div class="section-head">
+          <h2>Project History</h2>
+          <span class="section-tag" id="projCountTag"></span>
+        </div>
+
+        <div class="proj-add" id="addProjForm">
+          <input id="projName" placeholder="Project name" />
+          <select id="projBrand"></select>
+          <input id="projPeriod" placeholder="Period (e.g. Jun–Jul 2026)" />
+          <select id="projStatus">
+            <option value="done">Done</option>
+            <option value="hold">On Hold</option>
+            <option value="cancelled">Cancelled</option>
+          </select>
+          <input id="projNotes" placeholder="Result / short note" />
+          <button class="btn" id="addProjBtn">+ Add</button>
+        </div>
+
+        <div class="filter-row">
+          <label>Filter</label>
+          <select id="projBrandFilter"><option value="all">All Brands</option></select>
+        </div>
+
+        <table class="proj-table">
+          <thead>
+            <tr><th style="width:22%;">Project</th><th style="width:16%;">Brand</th><th style="width:14%;">Period</th><th style="width:12%;">Status</th><th>Result / Notes</th><th style="width:36px;"></th></tr>
+          </thead>
+          <tbody id="projBody"></tbody>
+        </table>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script>
+let mode = 'team'; 
+let taskBrandFilter = 'all';
+let projBrandFilter = 'all';
+let saveTimer = null;
+
+let data = {
+  teamName:'Team Name',
+  members:[],
+  brands:[
+    {id:'b1', name:'Brand 1', type:'marketing'},
+    {id:'b2', name:'Brand 2', type:'marketing'}
+  ],
+  todos:[],
+  pastProjects:[],
+  weekNote:''
+};
+
+const STORAGE_KEY = 'work-dashboard-data-en';
+
+function uid(){ return Math.random().toString(36).slice(2,10); }
+
+async function loadData(){
+  let uniqueKey = window.location.hash.substring(1);
+  
+  // Jika link belum punya tanda #, buat otomatis tanpa eror layar klik kemarin
+  if(!uniqueKey) {
+    uniqueKey = 'rep_' + Math.random().toString(36).slice(2, 10) + Math.random().toString(36).slice(2, 6);
+    window.location.hash = uniqueKey;
+  }
+  
+  // Gunakan database publik kvdb.io langsung lewat ID unik aplikasi
+  const CLOUD_URL = 'https://kvdb.io/s7W5c2q4Pq4Wn2mE8rT9yU/' + uniqueKey;
+  
+  try{
+    const res = await fetch(CLOUD_URL);
+    if(res.ok){
+      const text = await res.text();
+      if(text && text.trim() !== ""){
+        data = Object.assign(data, JSON.parse(text));
+        finishLoading();
+        return;
+      }
+    }
+  }catch(e){}
+
+  try{
+    const res = localStorage.getItem(STORAGE_KEY);
+    if(res) data = Object.assign(data, JSON.parse(res));
+  }catch(e){}
+  
+  finishLoading();
+}
+
+function finishLoading(){
+  document.getElementById('loading').style.display='none';
+  document.getElementById('app').style.display='block';
+  render();
+}
+
+function saveData(){
+  let uniqueKey = window.location.hash.substring(1);
+  if(!uniqueKey) return;
+  
+  const CLOUD_URL = 'https://kvdb.io/s7W5c2q4Pq4Wn2mE8rT9yU/' + uniqueKey;
+  
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(async ()=>{
+    try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(data)); }catch(e){}
+
+    try{
+      await fetch(CLOUD_URL, {
+        method: 'PUT',
+        body: JSON.stringify(data)
+      });
+      console.log('Sinkronisasi cloud berhasil!');
+    }catch(e){}
+  }, 400);
+}
+
+function setDateLabels(){
+  const now = new Date();
+  const startOfYear = new Date(now.getFullYear(),0,1);
+  const days = Math.floor((now - startOfYear)/86400000);
+  const week = Math.ceil((days + startOfYear.getDay()+1)/7);
+  document.getElementById('weekLabel').textContent = 'WEEK ' + week + ', ' + now.getFullYear();
+  document.getElementById('dateLabel').textContent = now.toLocaleDateString('en-US',{day:'numeric',month:'long',year:'numeric'});
+}
+
+function brandById(id){ return data.brands.find(b=>b.id===id); }
+
+function render(){
+  document.getElementById('teamName').value = data.teamName;
+  document.getElementById('weekNote').value = data.weekNote || '';
+
+  const brandRow = document.getElementById('brandRow');
+  brandRow.innerHTML='';
+  data.brands.forEach(b=>{
+    const chip = document.createElement('div');
+    chip.className='brand-chip';
+    chip.innerHTML = `<span class="type-tag ${b.type}">${b.type==='it'?'IT':'MKT'}</span><span>${escapeHtml(b.name)}</span>` + (mode==='team' ? `<button data-id="${b.id}" class="delBrand">&times;</button>` : '');
+    brandRow.appendChild(chip);
+  });
+  document.querySelectorAll('.delBrand').forEach(btn=>{
+    btn.onclick = ()=>{
+      const id = btn.getAttribute('data-id');
+      data.brands = data.brands.filter(x=>x.id!==id);
+      data.todos = data.todos.filter(t=>t.brandId!==id);
+      data.pastProjects = data.pastProjects.filter(p=>p.brandId!==id);
+      saveData(); render();
+    };
+  });
+
+  const memberRow = document.getElementById('memberRow');
+  memberRow.innerHTML='';
+  data.members.forEach(m=>{
+    const chip = document.createElement('div');
+    chip.className='member-chip';
+    chip.innerHTML = `<span>${escapeHtml(m)}</span>` + (mode==='team' ? `<button data-m="${escapeHtml(m)}" class="delMember">&times;</button>` : '');
+    memberRow.appendChild(chip);
+  });
+  if(data.members.length===0){
+    memberRow.innerHTML = '<span class="empty-hint">No members yet. Add one below.</span>';
+  }
+  document.querySelectorAll('.delMember').forEach(b=>{
+    b.onclick = ()=>{
+      const m = b.getAttribute('data-m');
+      data.members = data.members.filter(x=>x!==m);
+      data.todos = data.todos.filter(t=>t.member!==m);
+      saveData(); render();
+    };
+  });
+
+  const brandOptions = data.brands.map(b=>`<option value="${b.id}">${escapeHtml(b.name)}</option>`).join('') || '<option value="">Add a brand first</option>';
+  document.getElementById('taskBrand').innerHTML = brandOptions;
+  document.getElementById('projBrand').innerHTML = brandOptions;
+
+  const filterOptions = '<option value="all">All Brands</option>' + data.brands.map(b=>`<option value="${b.id}">${escapeHtml(b.name)}</option>`).join('');
+  document.getElementById('taskBrandFilter').innerHTML = filterOptions;
+  document.getElementById('taskBrandFilter').value = taskBrandFilter;
+  document.getElementById('projBrandFilter').innerHTML = filterOptions;
+  document.getElementById('projBrandFilter').value = projBrandFilter;
+
+  const sel = document.getElementById('taskMember');
+  sel.innerHTML = data.members.map(m=>`<option value="${escapeHtml(m)}">${escapeHtml(m)}</option>`).join('') || '<option value="">Add a member first</option>';
+
+  const filteredTodos = taskBrandFilter==='all' ? data.todos : data.todos.filter(t=>t.brandId===taskBrandFilter);
+  const total = filteredTodos.length;
+  const done = filteredTodos.filter(t=>t.status==='done').length;
+  const prog = filteredTodos.filter(t=>t.status==='progress').length;
+  const todo = filteredTodos.filter(t=>t.status==='todo').length;
+  document.getElementById('statTotal').textContent = total;
+  document.getElementById('statDone').textContent = done;
+  document.getElementById('statProgress').textContent = prog;
+  document.getElementById('statTodo').textContent = todo;
+  document.getElementById('taskCountTag').textContent = total + ' TASKS TRACKED';
+  const pct = total ? Math.round((done/total)*100) : 0;
+  document.getElementById('progressPct').textContent = pct + '%';
+  document.getElementById('progressFill').style.width = pct + '%';
+
+  const brandSummary = document.getElementById('brandSummary');
+  brandSummary.innerHTML='';
+  data.brands.forEach(b=>{
+    const bTodos = data.todos.filter(t=>t.brandId===b.id);
+    const bTotal = bTodos.length;
+    const bDone = bTodos.filter(t=>t.status==='done').length;
+    const bPct = bTotal ? Math.round((bDone/bTotal)*100) : 0;
+    const card = document.createElement('div');
+    card.className='brand-sum-card';
+    card.innerHTML = `
+      <div class="brand-sum-top">
+        <span class="brand-sum-name">${escapeHtml(b.name)}</span>
+        <span class="type-tag ${b.type}">${b.type==='it'?'IT':'MKT'}</span>
+      </div>
+      <div class="brand-sum-track"><div class="brand-sum-fill" style="width:${bPct}%"></div></div>
+      <div class="brand-sum-text">${bDone}/${bTotal} tasks &middot; ${bPct}%</div>
+    `;
+    brandSummary.appendChild(card);
+  });
+
+  renderCol('colTodo','todo', filteredTodos);
+  renderCol('colProgress','progress', filteredTodos);
+  renderCol('colDone','done', filteredTodos);
+
+  const filteredProjects = projBrandFilter==='all' ? data.pastProjects : data.pastProjects.filter(p=>p.brandId===projBrandFilter);
+  document.getElementById('projCountTag').textContent = filteredProjects.length + ' PROJECTS';
+  const body = document.getElementById('projBody');
+  body.innerHTML='';
+  if(filteredProjects.length===0){
+    body.innerHTML = '<tr><td colspan="6" class="empty-hint">No project history yet.</td></tr>';
+  } else {
+    filteredProjects.slice().reverse().forEach(p=>{
+      const tr = document.createElement('tr');
+      const badgeClass = p.status;
+      const badgeText = p.status==='done'?'Done':(p.status==='cancelled'?'Cancelled':'On Hold');
+      const brand = brandById(p.brandId);
+      tr.innerHTML = `
+        <td>${escapeHtml(p.name)}</td>
+        <td>${brand ? escapeHtml(brand.name) : '-'}</td>
+        <td>${escapeHtml(p.period||'-')}</td>
+        <td><span class="badge ${badgeClass}">${badgeText}</span></td>
+        <td>${escapeHtml(p.notes||'-')}</td>
+        <td>${mode==='team' ? `<button class="icon-btn del" data-id="${p.id}">&times;</button>` : ''}</td>
+      `;
+      body.appendChild(tr);
+    });
+    body.querySelectorAll('.icon-btn.del').forEach(b=>{
+      b.onclick = ()=>{
+        const id = b.getAttribute('data-id');
+        data.pastProjects = data.pastProjects.filter(x=>x.id!==id);
+        saveData(); render();
+      };
+    });
+  }
+
+  applyModeVisibility();
+}
+
+function renderCol(elId, status, sourceList){
+  const col = document.getElementById(elId);
+  col.innerHTML='';
+  const items = sourceList.filter(t=>t.status===status);
+  if(items.length===0){
+    col.innerHTML = '<div class="empty-hint">Empty</div>';
+    return;
+  }
+  items.forEach(t=>{
+    const brand = brandById(t.brandId);
+    const card = document.createElement('div');
+    card.className = 'task-card ' + status;
+    const deadlineTxt = t.deadline ? new Date(t.deadline).toLocaleDateString('en-US',{day:'2-digit',month:'short'}) : '';
+    card.innerHTML = `
+      <div class="top-row">
+        <span class="who">${escapeHtml(t.member||'-')}</span>
+        ${brand ? `<span class="brand-label">${escapeHtml(brand.name)}</span>` : ''}
+      </div>
+      <div class="txt ${status==='done'?'done':''}">${escapeHtml(t.text)}</div>
+      <div class="meta">
+        <span class="deadline">${deadlineTxt ? 'Due '+deadlineTxt : ''}</span>
+        <span class="actions"></span>
+      </div>
+    `;
+    const actions = card.querySelector('.actions');
+    if(mode==='team'){
+      if(status!=='todo'){
+        const back = document.createElement('button');
+        back.className='icon-btn'; back.textContent='←';
+        back.onclick=()=>{ t.status = status==='done'?'progress':'todo'; saveData(); render(); };
+        actions.appendChild(back);
+      }
+      if(status!=='done'){
+        const fwd = document.createElement('button');
+        fwd.className='icon-btn'; fwd.textContent='→';
+        fwd.onclick=()=>{ t.status = status==='todo'?'progress':'done'; saveData(); render(); };
+        actions.appendChild(fwd);
+      }
+      const del = document.createElement('button');
+      del.className='icon-btn del'; del.textContent='×';
+      del.onclick=()=>{ data.todos = data.todos.filter(x=>x.id!==t.id); saveData(); render(); };
+      actions.appendChild(del);
+    }
+    col.appendChild(card);
+  });
+}
+
+function escapeHtml(s){
+  const d = document.createElement('div');
+  d.textContent = s==null?'':String(s);
+  return d.innerHTML;
+}
+
+function applyModeVisibility(){
+  const teamOnlyEls = [
+    document.getElementById('brandSection').querySelector('.add-brand'),
+    document.getElementById('memberSection').querySelector('.add-member'),
+    document.getElementById('addTaskForm'),
+    document.getElementById('addProjForm'),
+  ];
+  teamOnlyEls.forEach(el=>{ if(el) el.style.display = mode==='team' ? 'grid' : 'none'; });
+  document.getElementById('weekNote').readOnly = mode!=='team';
+  document.getElementById('teamName').readOnly = mode!=='team';
+}
+
+document.getElementById('modeTeamBtn').onclick = ()=>{
+  mode='team';
+  document.getElementById('modeTeamBtn').classList.add('active');
+  document.getElementById('modeExecBtn').classList.remove('active');
+  render();
+};
+document.getElementById('modeExecBtn').onclick = ()=>{
+  mode='exec';
+  document.getElementById('modeExecBtn').classList.add('active');
+  document.getElementById('modeTeamBtn').classList.remove('active');
+  render();
+};
+
+document.getElementById('teamName').addEventListener('input', (e)=>{
+  data.teamName = e.target.value; saveData();
+});
+document.getElementById('weekNote').addEventListener('input', (e)=>{
+  data.weekNote = e.target.value; saveData();
+});
+
+document.getElementById('addBrandBtn').onclick = ()=>{
+  const inp = document.getElementById('newBrandInput');
+  const type = document.getElementById('newBrandType').value;
+  const val = inp.value.trim();
+  if(!val) return;
+  data.brands.push({id: uid(), name: val, type});
+  inp.value='';
+  saveData(); render();
+};
+
+document.getElementById('addMemberBtn').onclick = ()=>{
+  const inp = document.getElementById('newMemberInput');
+  const val = inp.value.trim();
+  if(!val) return;
+  if(!data.members.includes(val)) data.members.push(val);
+  inp.value='';
+  saveData(); render();
+};
+
+document.getElementById('addTaskBtn').onclick = ()=>{
+  const brandId = document.getElementById('taskBrand').value;
+  const member = document.getElementById('taskMember').value;
+  const text = document.getElementById('taskText').value.trim();
+  const deadline = document.getElementById('taskDeadline').value;
+  if(!member || !text || !brandId) return;
+  data.todos.push({ id: uid(), brandId, member, text, deadline, status:'todo' });
+  document.getElementById('taskText').value='';
+  document.getElementById('taskDeadline').value='';
+  saveData(); render();
+};
+
+document.getElementById('taskBrandFilter').addEventListener('change', e=>{
+  taskBrandFilter = e.target.value; render();
+});
+document.getElementById('projBrandFilter').addEventListener('change', e=>{
+  projBrandFilter = e.target.value; render();
+});
+
+document.getElementById('addProjBtn').onclick = ()=>{
+  const name = document.getElementById('projName').value.trim();
+  const brandId = document.getElementById('projBrand').value;
+  const period = document.getElementById('projPeriod').value.trim();
+  const status = document.getElementById('projStatus').value;
+  const notes = document.getElementById('projNotes').value.trim();
+  if(!name || !brandId) return;
+  data.pastProjects.push({ id: uid(), name, brandId, period, status, notes });
+  document.getElementById('projName').value='';
+  document.getElementById('projPeriod').value='';
+  document.getElementById('projNotes').value='';
+  saveData(); render();
+};
+
+setDateLabels();
+loadData();
+</script>
+</body>
+</html>
