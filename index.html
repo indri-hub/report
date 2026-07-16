@@ -243,7 +243,7 @@
 
   .share-hint{
     font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--text-soft);
-    background:#fff;border:1px dashed var(--line);border-radius:4px;padding:12px 14px;margin-bottom:28px;
+    background:#fff;border:1px dashed var(--accent);border-radius:4px;padding:12px 14px;margin-bottom:28px;
   }
   .share-hint b{color:var(--ink);}
 
@@ -265,7 +265,7 @@
   <div class="masthead">
     <div class="masthead-inner">
       <div class="eyebrow"><span class="dot"></span> REPORT DASHBOARD &mdash; INTERNAL</div>
-      <h1><input id="teamName" value="Team / Division Name" /></h1>
+      <h1><input id="teamName" value="Babagi/Digital Marketing" /></h1>
       <div class="masthead-sub">
         <span id="weekLabel"></span>
         <span id="dateLabel"></span>
@@ -278,11 +278,11 @@
   </div>
 
   <div class="wrap">
-    <div id="loading" class="loading">Memuat dashboard cloud...</div>
+    <div id="loading" class="loading">Memuat dashboard sakti...</div>
 
     <div id="app" style="display:none;">
       <div class="share-hint" id="shareAlertBox">
-        <b>Cara Share agar Update Otomatis:</b> Salin seluruh alamat link di atas browsermu <i>(wajib beserta tanda pagar # di ujungnya)</i> lalu kirim ke atasan atau timmu!
+        🚀 **LINK KONTROL AKTIF:** Setiap kali kamu mengetik, link di atas browsermu otomatis berubah mengunci datamu. Cukup **Salin Seluruh Link Panjang** di browsermu saat ini untuk dibagikan ke atasan/HP lain!
       </div>
 
       <!-- SUMMARY -->
@@ -419,10 +419,9 @@
 let mode = 'team'; 
 let taskBrandFilter = 'all';
 let projBrandFilter = 'all';
-let saveTimer = null;
 
 let data = {
-  teamName:'Team Name',
+  teamName:'Babagi/Digital Marketing',
   members:[],
   brands:[
     {id:'b1', name:'Brand 1', type:'marketing'},
@@ -437,35 +436,32 @@ const STORAGE_KEY = 'work-dashboard-data-en';
 
 function uid(){ return Math.random().toString(36).slice(2,10); }
 
-async function loadData(){
-  let uniqueKey = window.location.hash.substring(1);
+function loadData(){
+  let hash = window.location.hash;
   
-  // Jika link belum punya tanda #, buat otomatis tanpa eror layar klik kemarin
-  if(!uniqueKey) {
-    uniqueKey = 'rep_' + Math.random().toString(36).slice(2, 10) + Math.random().toString(36).slice(2, 6);
-    window.location.hash = uniqueKey;
+  // 1. Coba baca data langsung dari Kontainer Link (#data=...)
+  if(hash && hash.startsWith('#data=')) {
+    try {
+      let base64 = hash.substring(6);
+      let decoded = decodeURIComponent(escape(atob(base64)));
+      data = Object.assign(data, JSON.parse(decoded));
+      finishLoading();
+      return;
+    } catch(e) {
+      console.log("Bukan link kontainer baru, mencoba cadangan.");
+    }
   }
   
-  // Gunakan database publik kvdb.io langsung lewat ID unik aplikasi
-  const CLOUD_URL = 'https://kvdb.io/s7W5c2q4Pq4Wn2mE8rT9yU/' + uniqueKey;
-  
-  try{
-    const res = await fetch(CLOUD_URL);
-    if(res.ok){
-      const text = await res.text();
-      if(text && text.trim() !== ""){
-        data = Object.assign(data, JSON.parse(text));
-        finishLoading();
-        return;
-      }
+  // 2. Penyelamat Data: Ambil isi data "Babagi" kamu yang tersangkut di Chrome
+  try {
+    const local = localStorage.getItem(STORAGE_KEY);
+    if(local) {
+      data = Object.assign(data, JSON.parse(local));
     }
-  }catch(e){}
-
-  try{
-    const res = localStorage.getItem(STORAGE_KEY);
-    if(res) data = Object.assign(data, JSON.parse(res));
-  }catch(e){}
+  } catch(e){}
   
+  // Langsung bungkus ke URL biar linknya memanjang berisi data
+  updateLinkHash();
   finishLoading();
 }
 
@@ -475,24 +471,16 @@ function finishLoading(){
   render();
 }
 
-function saveData(){
-  let uniqueKey = window.location.hash.substring(1);
-  if(!uniqueKey) return;
-  
-  const CLOUD_URL = 'https://kvdb.io/s7W5c2q4Pq4Wn2mE8rT9yU/' + uniqueKey;
-  
-  clearTimeout(saveTimer);
-  saveTimer = setTimeout(async ()=>{
-    try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(data)); }catch(e){}
+function updateLinkHash(){
+  try {
+    let base64 = btoa(unescape(encodeURIComponent(JSON.stringify(data))));
+    window.history.replaceState(null, null, '#data=' + base64);
+  } catch(e){}
+}
 
-    try{
-      await fetch(CLOUD_URL, {
-        method: 'PUT',
-        body: JSON.stringify(data)
-      });
-      console.log('Sinkronisasi cloud berhasil!');
-    }catch(e){}
-  }, 400);
+function saveData(){
+  try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(data)); }catch(e){}
+  updateLinkHash();
 }
 
 function setDateLabels(){
