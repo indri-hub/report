@@ -243,7 +243,7 @@
 
   .share-hint{
     font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--text-soft);
-    background:#fff;border:1px dashed var(--accent);border-radius:4px;padding:12px 14px;margin-bottom:28px;
+    background:#fff;border:1px dashed var(--line);border-radius:4px;padding:12px 14px;margin-bottom:28px;
   }
   .share-hint b{color:var(--ink);}
 
@@ -278,11 +278,11 @@
   </div>
 
   <div class="wrap">
-    <div id="loading" class="loading">Memuat dashboard sakti...</div>
+    <div id="loading" class="loading">Menghubungkan ke database cloud aman...</div>
 
     <div id="app" style="display:none;">
       <div class="share-hint" id="shareAlertBox">
-        🚀 **LINK KONTROL AKTIF:** Setiap kali kamu mengetik, link di atas browsermu otomatis berubah mengunci datamu. Cukup **Salin Seluruh Link Panjang** di browsermu saat ini untuk dibagikan ke atasan/HP lain!
+        <b>Cara Share Otomatis:</b> Cukup kirim alamat link di atas browsermu <b>SEKALI SAJA</b> ke atasan. Ketika kamu update di laptop, data di link atasan akan berubah otomatis!
       </div>
 
       <!-- SUMMARY -->
@@ -419,6 +419,7 @@
 let mode = 'team'; 
 let taskBrandFilter = 'all';
 let projBrandFilter = 'all';
+let saveTimer = null;
 
 let data = {
   teamName:'Babagi/Digital Marketing',
@@ -436,32 +437,42 @@ const STORAGE_KEY = 'work-dashboard-data-en';
 
 function uid(){ return Math.random().toString(36).slice(2,10); }
 
-function loadData(){
-  let hash = window.location.hash;
+async function loadData(){
+  let uniqueKey = window.location.hash.substring(1);
   
-  // 1. Coba baca data langsung dari Kontainer Link (#data=...)
-  if(hash && hash.startsWith('#data=')) {
-    try {
-      let base64 = hash.substring(6);
-      let decoded = decodeURIComponent(escape(atob(base64)));
-      data = Object.assign(data, JSON.parse(decoded));
-      finishLoading();
-      return;
-    } catch(e) {
-      console.log("Bukan link kontainer baru, mencoba cadangan.");
-    }
-  }
-  
-  // 2. Penyelamat Data: Ambil isi data "Babagi" kamu yang tersangkut di Chrome
+  // Cek migrasi data lokal Chrome biar ketikan kamu ga ilang
   try {
-    const local = localStorage.getItem(STORAGE_KEY);
-    if(local) {
-      data = Object.assign(data, JSON.parse(local));
+    const localData = localStorage.getItem(STORAGE_KEY);
+    if (localData) {
+      data = Object.assign(data, JSON.parse(localData));
     }
   } catch(e){}
+
+  if(!uniqueKey || uniqueKey.startsWith('data=')) {
+    // Buat kamar cloud baru yang fresh
+    try {
+      const res = await fetch('https://api.npoint.io', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+      });
+      if(res.ok) {
+        const json = await res.json();
+        uniqueKey = json.id;
+        window.location.hash = uniqueKey;
+      }
+    } catch(e) {}
+  } else {
+    // Tarik data dari internet
+    try {
+      const res = await fetch('https://api.npoint.io/' + uniqueKey);
+      if(res.ok) {
+        const cloudData = await res.json();
+        data = Object.assign(data, cloudData);
+      }
+    } catch(e) {}
+  }
   
-  // Langsung bungkus ke URL biar linknya memanjang berisi data
-  updateLinkHash();
   finishLoading();
 }
 
@@ -471,16 +482,24 @@ function finishLoading(){
   render();
 }
 
-function updateLinkHash(){
-  try {
-    let base64 = btoa(unescape(encodeURIComponent(JSON.stringify(data))));
-    window.history.replaceState(null, null, '#data=' + base64);
-  } catch(e){}
-}
-
 function saveData(){
+  let uniqueKey = window.location.hash.substring(1);
   try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(data)); }catch(e){}
-  updateLinkHash();
+
+  if(!uniqueKey || uniqueKey.startsWith('data=')) return;
+  
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(async ()=>{
+    try{
+      // SOLUSI MUTAKHIR: Menggunakan PUT untuk menimpa data di cloud secara realtime
+      await fetch('https://api.npoint.io/' + uniqueKey, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+      });
+      console.log('Cloud ter-update otomatis!');
+    }catch(e){}
+  }, 500);
 }
 
 function setDateLabels(){
