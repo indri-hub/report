@@ -73,7 +73,7 @@
   .brand-chip button, .member-chip button{border:none;background:none;color:var(--text-soft);cursor:pointer;font-size:13px;padding:2px 4px;}
   .brand-chip button:hover, .member-chip button:hover{color:var(--warn);}
   
-  .add-brand, .add-member{display:flex;gap:8px;flex-wrap:wrap;}
+  .add-brand, .add-member{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px;}
   .add-brand input, .add-brand select, .add-member input{font-family:'Inter',sans-serif;font-size:13px;padding:7px 10px;border:1px solid var(--line);border-radius:100px;outline:none;}
   .add-brand input{width:200px;} .add-member input{width:160px;}
   .add-brand input:focus, .add-brand select:focus, .add-member input:focus{border-color:var(--accent);}
@@ -107,7 +107,7 @@
   .add-form{display:grid;grid-template-columns:1fr 1fr 1.6fr 1fr auto;gap:8px;margin-bottom:16px;background:#fff;border:1px solid var(--line);border-radius:4px;padding:12px;}
   .add-form input, .add-form select{font-family:'Inter',sans-serif;font-size:13px;padding:8px 10px;border:1px solid var(--line);border-radius:3px;background:var(--paper);color:var(--ink);outline:none;}
   .add-form input:focus, .add-form select:focus{border-color:var(--accent);}
-  .btn{font-family:'IBM Plex Mono',monospace;font-size:12px;background:var(--ink);color:var(--paper);border:none;border-radius:3px;padding:8px 16px;cursor:pointer;letter-spacing:.03em;}
+  .btn{font-family:'IBM Plex Mono',monospace;font-size:12px;background:var(--ink);color:var(--paper);border:none;border-radius:100px;padding:8px 16px;cursor:pointer;letter-spacing:.03em;}
   .btn:hover{background:var(--ink-2);} .btn.small{padding:6px 12px;font-size:11px;border-radius:100px;}
 
   /* PAST PROJECTS */
@@ -152,11 +152,11 @@
   </div>
 
   <div class="wrap">
-    <div id="loading" class="loading">Menghubungkan ke database cloud...</div>
+    <div id="loading" class="loading">Menghubungkan ke database live...</div>
 
     <div id="app" style="display:none;">
-      <div class="share-hint" id="shareAlertBox">
-        <b>✅ CLOUD REAL-TIME AKTIF:</b> Cukup salin seluruh alamat link di atas browsermu <b>SEKALI SAJA</b> ke atasan. Jika kamu mengedit di sini, data di link atasan otomatis berubah!
+      <div class="share-hint">
+        <b>✅ UPDATE REAL-TIME AKTIF:</b> Sekarang kamu bisa pakai link polosan <b>https://indri-hub.github.io/report/</b> di browser mana saja! Semua device akan langsung tersambung ke database yang sama.
       </div>
 
       <!-- SUMMARY -->
@@ -295,39 +295,30 @@ let taskBrandFilter = 'all';
 let projBrandFilter = 'all';
 let saveTimer = null;
 
-// Struktur Data Asli Claude
+// SINKRONISASI MANDEGA: Mengunci ID database sukses milikmu langsung di dalam sistem
+const CLOUD_ID = 'ff8081819d82fab6019f6c3ebfcf70df';
+
 let data = {
   teamName:'Babagi/Digital Marketing',
   weekNote:'',
   members:[],
-  brands:[], // format: {id, name, type}
-  todos:[], // format: {id, brandId, member, text, deadline, status}
-  pastProjects:[] // format: {id, name, brandId, period, status, notes}
+  brands:[], 
+  todos:[], 
+  pastProjects:[] 
 };
-
-const hash = window.location.hash.substring(1);
 
 async function init(){
   setDateLabels();
   
-  // Penyelamatan data lokal
+  // Ambil cadangan lokal jika ada
   try {
     let local = localStorage.getItem('babagi-cloud-live');
-    if(local) {
-      let parsed = JSON.parse(local);
-      // Migrasi jika sebelumnya pakai format lama (tasks -> todos)
-      if(parsed.tasks && (!parsed.todos || parsed.todos.length===0)) {
-        parsed.todos = parsed.tasks.map(t => ({id: t.id, brandId: t.brand, member: t.member, text: t.txt, status: (t.status==='prog'?'progress':t.status)}));
-      }
-      data = Object.assign(data, parsed);
-    }
+    if(local) data = Object.assign(data, JSON.parse(local));
   } catch(e){}
 
-  // Mulai Engine Real-Time jika sudah ada link ID
-  if(hash && !hash.startsWith('rep_') && !hash.startsWith('data=')) {
-    await loadFromCloud(hash);
-    setInterval(() => loadFromCloud(hash), 4000); // Polling tiap 4 detik
-  }
+  // Jalankan siklus cloud dengan ID permanen
+  await loadFromCloud(CLOUD_ID);
+  setInterval(() => loadFromCloud(CLOUD_ID), 4000); // Sinkronisasi otomatis tiap 4 detik!
 
   document.getElementById('loading').style.display='none';
   document.getElementById('app').style.display='block';
@@ -336,40 +327,35 @@ async function init(){
 
 async function loadFromCloud(id) {
   try {
-    let res = await fetch('https://api.npoint.io/' + id);
+    let res = await fetch('https://api.restful-api.dev/objects/' + id);
     if(res.ok) {
       let json = await res.json();
-      if(json) {
-        // Auto konversi format lama jika terdeteksi
-        if(json.tasks && (!json.todos || json.todos.length===0)) {
-          json.todos = json.tasks.map(t => ({id: t.id, brandId: t.brand, member: t.member, text: t.txt, status: (t.status==='prog'?'progress':t.status)}));
-        }
-        data = Object.assign(data, json);
+      if(json && json.data) {
+        data = Object.assign(data, json.data);
       }
       let dot = document.getElementById('syncDot');
-      if(dot) dot.style.background = 'var(--ok)'; // Hijau = Sinkron
+      if(dot) dot.style.background = 'var(--ok)'; // Hijau = Terhubung Lancar
       render();
     }
   } catch(e) {
     let dot = document.getElementById('syncDot');
-    if(dot) dot.style.background = 'var(--warn)'; // Merah = Macet
+    if(dot) dot.style.background = 'var(--warn)'; // Merah = Jaringan Offline
   }
 }
 
 function saveData(){
   try{ localStorage.setItem('babagi-cloud-live', JSON.stringify(data)); }catch(e){}
-  if(!hash || hash.startsWith('rep_') || hash.startsWith('data=')) return;
   
   let dot = document.getElementById('syncDot');
-  if(dot) dot.style.background = 'var(--accent)'; // Kuning = Upload
+  if(dot) dot.style.background = 'var(--accent)'; // Kuning = Mengirim Data ke Cloud
 
   clearTimeout(saveTimer);
   saveTimer = setTimeout(async ()=>{
     try{
-      await fetch('https://api.npoint.io/' + hash, {
-        method: 'POST',
+      await fetch('https://api.restful-api.dev/objects/' + CLOUD_ID, {
+        method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data)
+        body: JSON.stringify({ name: "Babagi_Dashboard", data: data })
       });
       if(dot) dot.style.background = 'var(--ok)';
     }catch(e){
@@ -392,11 +378,15 @@ function brandById(id){ return data.brands.find(b=>b.id===id); }
 function escapeHtml(s){ const d = document.createElement('div'); d.textContent = s==null?'':String(s); return d.innerHTML; }
 
 function render(){
-  // Bind Inputs
-  document.getElementById('teamName').value = data.teamName || 'Babagi/Digital Marketing';
-  document.getElementById('weekNote').value = data.weekNote || '';
+  // Mengunci input teks saat user sedang mengetik agar kursor tidak melompat ketika sinkronisasi berjalan
+  if (document.activeElement !== document.getElementById('teamName')) {
+    document.getElementById('teamName').value = data.teamName || 'Babagi/Digital Marketing';
+  }
+  if (document.activeElement !== document.getElementById('weekNote')) {
+    document.getElementById('weekNote').value = data.weekNote || '';
+  }
 
-  // Render Brands
+  // Brands
   const brandRow = document.getElementById('brandRow');
   brandRow.innerHTML='';
   (data.brands||[]).forEach(b=>{
@@ -415,7 +405,7 @@ function render(){
     };
   });
 
-  // Render Members
+  // Members
   const memberRow = document.getElementById('memberRow');
   memberRow.innerHTML='';
   (data.members||[]).forEach(m=>{
@@ -434,7 +424,6 @@ function render(){
     };
   });
 
-  // Dropdowns & Filters
   const brandOptions = (data.brands||[]).map(b=>`<option value="${b.id}">${escapeHtml(b.name)}</option>`).join('') || '<option value="">Add a brand first</option>';
   document.getElementById('taskBrand').innerHTML = brandOptions;
   document.getElementById('projBrand').innerHTML = brandOptions;
@@ -448,7 +437,7 @@ function render(){
   const sel = document.getElementById('taskMember');
   sel.innerHTML = (data.members||[]).map(m=>`<option value="${escapeHtml(m)}">${escapeHtml(m)}</option>`).join('') || '<option value="">Add a member first</option>';
 
-  // Todo Stats
+  // Calculations
   const filteredTodos = taskBrandFilter==='all' ? (data.todos||[]) : (data.todos||[]).filter(t=>t.brandId===taskBrandFilter);
   const total = filteredTodos.length;
   const done = filteredTodos.filter(t=>t.status==='done').length;
@@ -465,7 +454,7 @@ function render(){
   document.getElementById('progressPct').textContent = pct + '%';
   document.getElementById('progressFill').style.width = pct + '%';
 
-  // Brand Summary Widget
+  // Brand Cards
   const brandSummary = document.getElementById('brandSummary');
   brandSummary.innerHTML='';
   (data.brands||[]).forEach(b=>{
@@ -486,12 +475,11 @@ function render(){
     brandSummary.appendChild(card);
   });
 
-  // Render Task Columns
   renderCol('colTodo','todo', filteredTodos);
   renderCol('colProgress','progress', filteredTodos);
   renderCol('colDone','done', filteredTodos);
 
-  // Render Projects
+  // History Projects Table
   const filteredProjects = projBrandFilter==='all' ? (data.pastProjects||[]) : (data.pastProjects||[]).filter(p=>p.brandId===projBrandFilter);
   document.getElementById('projCountTag').textContent = filteredProjects.length + ' PROJECTS';
   const body = document.getElementById('projBody');
@@ -581,7 +569,6 @@ function applyModeVisibility(){
   document.getElementById('teamName').readOnly = mode!=='team';
 }
 
-// Event Listeners
 document.getElementById('modeTeamBtn').onclick = ()=>{ mode='team'; document.getElementById('modeTeamBtn').classList.add('active'); document.getElementById('modeExecBtn').classList.remove('active'); render(); };
 document.getElementById('modeExecBtn').onclick = ()=>{ mode='exec'; document.getElementById('modeExecBtn').classList.add('active'); document.getElementById('modeTeamBtn').classList.remove('active'); render(); };
 
