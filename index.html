@@ -41,9 +41,8 @@
   .add-brand input, .add-member input{padding:7px;border:1px solid var(--line);border-radius:4px;}
   .btn{font-family:'IBM Plex Mono',monospace;font-size:12px;background:var(--ink);color:var(--paper);border:none;border-radius:100px;padding:8px 16px;cursor:pointer;}
   
-  /* TOMBOL EMERGENCY */
   .emergency-box{background:#fff;border:2px dashed var(--warn);padding:16px;margin-bottom:20px;border-radius:4px;text-align:center;}
-  .btn-danger{background:var(--warn);color:#fff;font-weight:bold;border:none;padding:10px 20px;border-radius:100px;cursor:pointer;font-family:'IBM Plex Mono',monospace;margin-top:10px;}
+  .btn-danger{background:var(--ok);color:#fff;font-weight:bold;border:none;padding:10px 20px;border-radius:100px;cursor:pointer;font-family:'IBM Plex Mono',monospace;margin-top:10px;}
   
   .share-hint{font-family:'IBM Plex Mono',monospace;font-size:11px;background:#fff;border:1px dashed var(--ok);padding:12px;margin-bottom:20px;border-radius:4px;}
   .board{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;}
@@ -58,7 +57,7 @@
 
 <div class="masthead">
   <div class="masthead-inner">
-    <div class="eyebrow"><span class="dot" id="syncDot"></span> REPORT DASHBOARD &mdash; REAL-TIME</div>
+    <div class="eyebrow"><span class="dot" id="syncDot"></span> REPORT DASHBOARD &mdash; REAL-TIME LIVE</div>
     <h1><input id="teamName" value="Babagi/Digital Marketing" /></h1>
     <div class="masthead-sub"><span id="dateLabel"></span></div>
     <div class="mode-switch"><button id="modeTeamBtn" class="active">EDIT MODE</button><button id="modeExecBtn">VIEW MODE</button></div>
@@ -66,15 +65,14 @@
 </div>
 
 <div class="wrap">
-  <!-- KOTAK EMERGENCY JIKA LINK POLOS -->
   <div class="emergency-box" id="emergencyBox" style="display:none;">
-    <p style="margin:0; color:var(--warn); font-weight:bold;">⚠️ SISTEM CLOUD BELUM AKTIF (LINK MASIH POLOS)</p>
-    <p style="margin:5px 0 0; font-size:13px; color:var(--text-soft);">Jaringan internet/browser kamu memblokir pembuatan link otomatis. Klik tombol di bawah untuk memaksa membuat link unik.</p>
-    <button class="btn-danger" id="forceBtn" onclick="forceCreateDatabase()">⚡ PAKSA BIKIN LINK SHARE</button>
+    <p style="margin:0; color:var(--ok); font-weight:bold;">✨ KODE BARU SIAP DIAKTIFKAN</p>
+    <p style="margin:5px 0 0; font-size:13px; color:var(--text-soft);">Klik tombol hijau di bawah ini untuk membuat link pelaporan real-time yang baru via server cadangan.</p>
+    <button class="btn-danger" id="forceBtn" onclick="forceCreateDatabase()">⚡ AKTIFKAN LINK REAL-TIME</button>
   </div>
 
   <div class="share-hint" id="shareHintBox" style="display:none;">
-    ✅ <b>LINK REAL-TIME AKTIF:</b> Cukup salin seluruh alamat link ber-ID di atas browsermu <b>SEKALI SAJA</b> ke atasan.
+    ✅ <b>LINK DASHBOARD LIVE AKTIF:</b> Cukup kirim alamat link panjang ber-ID di atas browsermu <b>SEKALI SAJA</b> ke atasan!
   </div>
 
   <div id="mainApp">
@@ -124,17 +122,12 @@ let saveTimer;
 
 async function init() {
   document.getElementById('dateLabel').textContent = new Date().toLocaleDateString('en-US',{dateStyle:'full'});
-  
-  // Ambil cadangan data dari memori Chrome lokal
   try{ let local = localStorage.getItem('babagi-cloud-live'); if(local) data = Object.assign(data, JSON.parse(local)); }catch(e){}
 
   let hash = window.location.hash.substring(1);
 
   if(!hash || hash.startsWith('rep_') || hash.startsWith('data=')) {
-    // Tampilkan kotak darurat jika link masih polos
     document.getElementById('emergencyBox').style.display = 'block';
-    // Coba buat otomatis lewat server npoint
-    autoCreate();
   } else {
     document.getElementById('shareHintBox').style.display = 'block';
     await loadFromCloud(hash);
@@ -143,46 +136,36 @@ async function init() {
   render();
 }
 
-async function autoCreate() {
-  let hash = window.location.hash.substring(1);
-  if(hash && !hash.startsWith('rep_') && !hash.startsWith('data=')) return;
-  try {
-    let res = await fetch('https://api.npoint.io', {
-      method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(data)
-    });
-    if(res.ok) {
-      let json = await res.json();
-      window.location.hash = json.id;
-      window.location.reload();
-    }
-  } catch(e){}
-}
-
 async function forceCreateDatabase() {
   const btn = document.getElementById('forceBtn');
-  btn.innerText = "Sedang Menghubungkan...";
+  btn.innerText = "Sedang Menghubungkan ke Server Baru...";
   try {
-    let res = await fetch('https://api.npoint.io', {
-      method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(data)
+    let res = await fetch('https://api.restful-api.dev/objects', {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({ name: "Babagi_Dashboard", data: data })
     });
     if(res.ok) {
       let json = await res.json();
       window.location.hash = json.id;
-      alert("Link Unik Berhasil Dibuat! Halaman akan dimuat ulang.");
+      alert("Link Unik Sukses Terbuat! Halaman akan memuat ulang.");
       window.location.reload();
-    } else { alert("Server penuh, coba klik sekali lagi."); btn.innerText = "⚡ PAKSA BIKIN LINK SHARE"; }
+    } else {
+      alert("Server cadangan sibuk, coba klik sekali lagi.");
+      btn.innerText = "⚡ AKTIFKAN LINK REAL-TIME";
+    }
   } catch(e) {
-    alert("Koneksi diblokir browser. Coba matikan VPN/Adblock jika ada, lalu klik lagi.");
-    btn.innerText = "⚡ PAKSA BIKIN LINK SHARE";
+    alert("Koneksi gagal. Silakan coba klik tombolnya sekali lagi.");
+    btn.innerText = "⚡ AKTIFKAN LINK REAL-TIME";
   }
 }
 
 async function loadFromCloud(id) {
   try {
-    let res = await fetch('https://api.npoint.io/' + id);
+    let res = await fetch('https://api.restful-api.dev/objects/' + id);
     if(res.ok) {
       let json = await res.json();
-      data = Object.assign(data, json);
+      if(json.data) data = Object.assign(data, json.data);
       document.getElementById('syncDot').style.background = 'var(--ok)';
       render();
     }
@@ -198,8 +181,10 @@ function saveData() {
   clearTimeout(saveTimer);
   saveTimer = setTimeout(async () => {
     try {
-      await fetch('https://api.npoint.io/' + id, {
-        method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(data)
+      await fetch('https://api.restful-api.dev/objects/' + id, {
+        method:'PUT',
+        headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({ name: "Babagi_Dashboard", data: data })
       });
       document.getElementById('syncDot').style.background = 'var(--ok)';
     } catch(e) { document.getElementById('syncDot').style.background = 'var(--warn)'; }
