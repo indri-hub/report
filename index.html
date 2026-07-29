@@ -318,7 +318,7 @@ async function init(){
 
   // Jalankan siklus cloud dengan ID permanen
   await loadFromCloud(CLOUD_ID);
-  setInterval(() => loadFromCloud(CLOUD_ID), 4000); // Sinkronisasi otomatis tiap 4 detik!
+  setInterval(() => loadFromCloud(CLOUD_ID), 300000); // Sinkronisasi otomatis tiap 4 detik!
 
   document.getElementById('loading').style.display='none';
   document.getElementById('app').style.display='block';
